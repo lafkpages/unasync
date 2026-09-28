@@ -10,7 +10,11 @@ if (!import.meta.main) {
   throw new Error("This module is a CLI and not to be imported.");
 }
 
+if (process.argv[0] === process.execPath) {
+  process.argv.shift();
+}
 const inputFilePath = process.argv[1];
+
 if (!inputFilePath) {
   console.error("error: missing input file path.");
   process.exit(1);
