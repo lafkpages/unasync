@@ -5,6 +5,7 @@ node_modules
 out
 dist
 *.tgz
+/tests/fixture*.ts
 /tests/*.sync.ts
 /.typecheck.tmp
 

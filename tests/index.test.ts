@@ -135,7 +135,7 @@ describe("basic async functions", () => {
 });
 
 describe("invalid inputs", () => {
-  test("await is not allowed on non-call expressions", async () => {
+  test("await is not allowed on non-call expressions", () => {
     expect(
       unasync(`\
         async function fooAsync(
@@ -145,6 +145,19 @@ describe("invalid inputs", () => {
           return await p;
         }
         declare const foo: Unasynced<typeof fooAsync>;
+      `),
+    ).rejects.toThrowError();
+  });
+
+  test("await is not allowed on functions not passed via parameters", () => {
+    expect(
+      unasync(`\
+        const helper: (n: number) => Promise<number> = async (n) => n + 1;
+
+        export async function myAsyncFn() {
+          return await helper(1);
+        }
+        export declare const mySyncFn: Unasynced<typeof myAsyncFn>;
       `),
     ).rejects.toThrowError();
   });

@@ -101,7 +101,7 @@ export function unasyncTraversal(
               throw new Error("Await expressions must call bare identifiers");
             }
 
-            const binding = subpath.scope.getBindingIdentifier(
+            const binding = subpath.scope.getBinding(
               subpath.node.argument.callee.name,
             );
 
@@ -111,11 +111,19 @@ export function unasyncTraversal(
               );
             }
 
+            if (!binding.path.parentPath.isFunctionDeclaration()) {
+              throw new Error(
+                "Only functions passed via parameters can be awaited in a function to unasync",
+              );
+            }
+
             if (
-              !isTSTypeAnnotation(binding.typeAnnotation) ||
-              !isTSFunctionType(binding.typeAnnotation.typeAnnotation) ||
+              !isTSTypeAnnotation(binding.identifier.typeAnnotation) ||
+              !isTSFunctionType(
+                binding.identifier.typeAnnotation.typeAnnotation,
+              ) ||
               !isTSTypeAnnotation(
-                binding.typeAnnotation.typeAnnotation.returnType,
+                binding.identifier.typeAnnotation.typeAnnotation.returnType,
               )
             ) {
               throw new Error(
@@ -124,17 +132,18 @@ export function unasyncTraversal(
             }
 
             const innerPromiseType = getInnerPromiseType(
-              binding.typeAnnotation.typeAnnotation.returnType.typeAnnotation,
+              binding.identifier.typeAnnotation.typeAnnotation.returnType
+                .typeAnnotation,
               subpath.scope,
             );
 
             if (innerPromiseType) {
-              binding.typeAnnotation.typeAnnotation.returnType.typeAnnotation =
+              binding.identifier.typeAnnotation.typeAnnotation.returnType.typeAnnotation =
                 innerPromiseType;
             } else {
-              binding.typeAnnotation.typeAnnotation.returnType.typeAnnotation =
+              binding.identifier.typeAnnotation.typeAnnotation.returnType.typeAnnotation =
                 tsAwaitedType(
-                  binding.typeAnnotation.typeAnnotation.returnType
+                  binding.identifier.typeAnnotation.typeAnnotation.returnType
                     .typeAnnotation,
                 );
             }
