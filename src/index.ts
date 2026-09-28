@@ -1,8 +1,14 @@
+import { copyFile } from "node:fs/promises";
+
 import { parse } from "@babel/parser";
 
 import { findFunctionsToUnasync, unasyncTraversal } from "./ast";
 import { generateUnprocessed } from "./ast/generate";
 import { applySplices, formatWithPrettier } from "./postprocess";
+
+if (!import.meta.main) {
+  throw new Error("This module is a CLI and not to be imported.");
+}
 
 const inputFilePath = process.argv[1];
 if (!inputFilePath) {
@@ -25,19 +31,24 @@ const ast = parse(inputContent, {
   locations: true,
 });
 
-const functionsToUnasync = findFunctionsToUnasync(ast);
+const [functionsToUnasync, count] = findFunctionsToUnasync(ast);
 
-const splices = unasyncTraversal(ast, inputContent, functionsToUnasync);
+if (count) {
+  const splices = unasyncTraversal(ast, inputContent, functionsToUnasync);
 
-const unasyncedContentUnprocessed = generateUnprocessed(ast);
-const unasyncedContentUnformatted = applySplices(
-  unasyncedContentUnprocessed,
-  splices,
-);
+  const unasyncedContentUnprocessed = generateUnprocessed(ast);
+  const unasyncedContentUnformatted = applySplices(
+    unasyncedContentUnprocessed,
+    splices,
+  );
 
-const unasyncedContentFormatted = await formatWithPrettier(
-  unasyncedContentUnformatted,
-);
+  const unasyncedContentFormatted = await formatWithPrettier(
+    unasyncedContentUnformatted,
+  );
 
-const outputFile = Bun.file(outputFilePath);
-await outputFile.write(unasyncedContentFormatted);
+  const outputFile = Bun.file(outputFilePath);
+  await outputFile.write(unasyncedContentFormatted);
+} else {
+  console.warn("No functions to unasync.");
+  await copyFile(inputFilePath, outputFilePath);
+}

@@ -23,6 +23,7 @@ export type FunctionsToUnasync = WeakMap<
 
 export function findFunctionsToUnasync(ast: File) {
   const functionsToUnasync: FunctionsToUnasync = new WeakMap();
+  let count = 0;
 
   traverse(ast, {
     VariableDeclaration(path) {
@@ -40,10 +41,11 @@ export function findFunctionsToUnasync(ast: File) {
         unasyncedName: binding.unasyncedName,
         path,
       });
+      count++;
     },
   });
 
-  return functionsToUnasync;
+  return [functionsToUnasync, count] as const;
 }
 
 export function unasyncTraversal(
