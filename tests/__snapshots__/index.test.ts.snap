@@ -1,0 +1,106 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`basic async functions basic unexported async function with no parameters 1`] = `
+"function foo() {
+  return 1;
+}
+"
+`;
+
+exports[`basic async functions basic exported async function with no parameters 1`] = `
+"export async function fooAsync() {
+  return 1;
+}
+export function foo() {
+  return 1;
+}
+"
+`;
+
+exports[`basic async functions basic exported async function with unrelated parameters 1`] = `
+"export async function fooAsync(x: number) {
+  return x + 1;
+}
+export function foo(x: number) {
+  return x + 1;
+}
+"
+`;
+
+exports[`basic async functions basic exported async function with sync callback parameter 1`] = `
+"export async function fooAsync(callback: () => unknown) {
+  return await callback();
+}
+export function foo(callback: () => unknown) {
+  return callback();
+}
+"
+`;
+
+exports[`basic async functions basic unexported async function with async callback parameter 1`] = `
+"function foo(callback: () => unknown) {
+  return callback();
+}
+"
+`;
+
+exports[`basic async functions basic exported async function with async callback parameter 1`] = `
+"export async function fooAsync(callback: () => Promise<unknown>) {
+  return await callback();
+}
+export function foo(callback: () => unknown) {
+  return callback();
+}
+"
+`;
+
+exports[`basic async functions basic unexported async function with async callback parameter with unasynced exported 1`] = `
+"function foo(callback: () => unknown) {
+  return callback();
+}
+"
+`;
+
+exports[`basic async functions basic unexported async function with async callback parameter with unasynced default-exported 1`] = `
+"function foo(callback: () => unknown) {
+  return callback();
+}
+
+export default foo;
+"
+`;
+
+exports[`formatting newlines are preserved 1`] = `
+"import type { MaybePromise } from "bun";
+
+export async function exampleFnAsync(
+  callback: (x: number) => MaybePromise<number>,
+): Promise<number> {
+  // do sync stuff
+  const x = 1;
+
+  // do async stuff
+  const result = await callback(x);
+  return result;
+}
+export function exampleFn(
+  callback: (x: number) => Awaited<MaybePromise<number>>,
+): number {
+  // do sync stuff
+  const x = 1;
+
+  // do async stuff
+  const result = callback(x);
+  return result;
+}
+
+type SS = Promise<string>;
+
+export async function anotherAsync(): SS {
+  return "hi";
+}
+export function anotherSync(): Awaited<SS> {
+  return "hi";
+}
+"
+`;
