@@ -14,7 +14,7 @@ async function unasync(js: string) {
     locations: true,
   });
 
-  const functionsToUnasync = findFunctionsToUnasync(ast);
+  const [functionsToUnasync] = findFunctionsToUnasync(ast);
 
   const splices = unasyncTraversal(ast, js, functionsToUnasync);
 
